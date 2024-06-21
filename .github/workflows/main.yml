@@ -1,0 +1,49 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Unit Tests
+      run: |
+        python -m unittest discover -s tests
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: eldanius/python-microservice:${{ github.sha }}
+
+    - name: Deploy to Kubernetes
+      uses: azure/k8s-deploy@v1
+      with:
+        namespace: default
+        manifests: |
+          ./deployment.yaml
+        images: |
+          eldanius/python-microservice:${{ github.sha }}
+        strategy: apply
