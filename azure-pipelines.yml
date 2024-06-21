@@ -1,5 +1,6 @@
 trigger:
 - main
+- dev
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -43,6 +44,16 @@ steps:
     artifactName: 'drop'
     publishLocation: 'Container'
 
+- task: Kubernetes@1
+  inputs:
+    connectionType: 'Kubernetes Service Connection'
+    kubernetesServiceEndpoint: '$(kubernetesServiceConnection)'
+    namespace: 'default'
+    command: 'apply'
+    useConfigurationFile: true
+    configuration: 'deployment.yaml'
+  displayName: 'Deploy to Kubernetes'
+
 - task: CopyFiles@2
   inputs:
     contents: |
@@ -60,13 +71,3 @@ steps:
     pathToPublish: '$(Build.ArtifactStagingDirectory)'
     artifactName: 'drop'
     publishLocation: 'Container'
-
-- task: Kubernetes@1
-  inputs:
-    connectionType: 'Kubernetes Service Connection'
-    kubernetesServiceEndpoint: '$(kubernetesServiceConnection)'
-    namespace: 'default'
-    command: 'apply'
-    useConfigurationFile: 'true'
-    configuration: 'deployment.yaml'
-  displayName: 'Deploy to Kubernetes'
