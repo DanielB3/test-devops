@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tech-prod
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: python-microservice
+  namespace: tech-prod
+spec:
+  containers:
+  - name: python-container
+    image: eldanius/python-microservice  # Usar tu imagen de Docker Hub
+    resources:
+      limits:
+        memory: "512Mi"
+      requests:
+        memory: "256Mi"
+    ports:
+    - containerPort: 5000
+    env:
+    - name: NETWORK
+      value: "internal prod"
+  restartPolicy: Always
