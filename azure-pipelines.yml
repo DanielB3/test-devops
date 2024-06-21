@@ -11,6 +11,7 @@ variables:
   dockerfilePath: 'Dockerfile'
   tag: '$(Build.BuildId)'
   containerRegistry: 'index.docker.io/eldanius'
+  kubernetesServiceConnection: 'kubernetesconnection'
 
 steps:
 - task: UsePythonVersion@0
@@ -51,4 +52,21 @@ steps:
       **/deployment.yaml
       **/grafana.yaml
       **/prometheus.yaml
-   
+    targetFolder: '$(Build.ArtifactStagingDirectory)'
+  displayName: 'Copy Files to Artifacts'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: 'drop'
+    publishLocation: 'Container'
+
+- task: Kubernetes@1
+  inputs:
+    connectionType: 'Kubernetes Service Connection'
+    kubernetesServiceEndpoint: '$(kubernetesServiceConnection)'
+    namespace: 'default'
+    command: 'apply'
+    useConfigurationFile: 'true'
+    configuration: 'deployment.yaml'
+  displayName: 'Deploy to Kubernetes'
