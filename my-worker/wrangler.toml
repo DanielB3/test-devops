@@ -1,0 +1,5 @@
+name = "test-infra"
+main = "worker.js"
+compatibility_date = "2023-08-23"
+
+account_id = "cb256c8e046b92050b07d3bc412f9606"
