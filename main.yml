@@ -28,16 +28,16 @@ jobs:
       run: |
         python -m unittest discover -s tests
 
-    - name: Login to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u eldanius --password-stdin
 
     - name: Build and push Docker image
-      run: |
-        docker build -t eldanius/python-microservice:${{ github.sha }} .
-        docker push eldanius/python-microservice:${{ github.sha }}
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: eldanius/python-microservice:${{ github.sha }}
 
     - name: Set up kubectl
       uses: azure/setup-kubectl@v1
